@@ -14,8 +14,8 @@ defmodule EctoTypes.Token do
 
   use Ecto.Type
 
-  @salt_length 4
-  @data_length 26
+  @salt_length 2
+  @data_length 22
   @signed_length @salt_length + @data_length
 
   @impl Ecto.Type
@@ -35,7 +35,7 @@ defmodule EctoTypes.Token do
   @impl Ecto.Type
   @spec load(any) :: {:ok, binary} | :error
   def load(<<_::128>> = raw_uuid) do
-    Base.encode32(raw_uuid, padding: false) |> sign
+    Base.url_encode64(raw_uuid, padding: false) |> sign
   end
 
   def load(_) do
@@ -46,7 +46,7 @@ defmodule EctoTypes.Token do
   @spec dump(any) :: {:ok, binary} | :error
   def dump(<<_::bytes-size(@signed_length)>> = signed_token) do
     with {:ok, unsigned_token} <- verify(signed_token),
-         {:ok, raw_uuid} <- Base.decode32(unsigned_token, padding: false) do
+         {:ok, raw_uuid} <- Base.url_decode64(unsigned_token, padding: false) do
       {:ok, raw_uuid}
     else
       _ -> :error
@@ -77,7 +77,7 @@ defmodule EctoTypes.Token do
         :blake2s,
         ~s[#{unsigned_token}#{System.get_env("TOKEN_SIGNING_SALT")}]
       )
-      |> Base.encode32(padding: false)
+      |> Base.url_encode64(padding: false)
       |> binary_part(0, @salt_length)
 
     {:ok, "#{salt}#{unsigned_token}"}

@@ -20,7 +20,7 @@ defmodule EctoTypes.TokenTest do
     test "load/1" do
       raw_uuid = bingenerate()
       {:ok, token} = Token.load(raw_uuid)
-      assert String.length(token) == 30
+      assert String.length(token) == 24
     end
 
     test "load/1 and dump/1 convert back and forth to a binary uuid" do

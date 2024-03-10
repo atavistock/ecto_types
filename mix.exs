@@ -4,7 +4,7 @@ defmodule EctoTypes.MixProject do
   def project do
     [
       app: :ecto_types,
-      version: "0.1.3",
+      version: "0.1.5",
       elixir: "~> 1.14",
       deps: deps()
     ]
@@ -21,7 +21,6 @@ defmodule EctoTypes.MixProject do
   defp deps do
     [
       {:ecto, "~> 3.0"},
-      {:ex_unit, "~> 1.6", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
     ]
