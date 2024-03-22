@@ -21,7 +21,7 @@ defmodule EctoTypes.MixProject do
   defp deps do
     [
       {:ecto_sql, "~> 3.7"},
-      {:credo, "~> 1.5", only: [:dev, :test]
+      {:credo, "~> 1.5", only: [:dev, :test]}
     ]
   end
 end
