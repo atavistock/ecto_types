@@ -5,6 +5,11 @@ defmodule EctoTypes.Types.Token do
     At the database this is backed by a UUID field (128-bits), but also includes a 16-bit checksum to
     quickly invalidate and avoid hitting the database.  This appears as a 26 character base-32
     alphanumeric token for use in urls.
+
+    At the database level this should be a UUID field with a default UUIDv4 value set as
+    ```
+    DEFAULT gen_random_uuid() NOT NULL
+    ```
   """
 
   use Ecto.Type
@@ -57,7 +62,7 @@ defmodule EctoTypes.Types.Token do
     salt =
       :crypto.hash(
         :blake2s,
-        ~s[#{unsigned_token}#{Application.fetch_env!(:carmagic, :token_signing_salt)}]
+        ~s[#{unsigned_token}#{Application.fetch_env!(:token, :signing_salt)}]
       )
       |> Base.encode32(padding: false)
       |> binary_part(0, @salt_length)
