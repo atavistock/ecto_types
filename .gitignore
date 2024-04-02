@@ -1,6 +1,9 @@
 # The directory Mix will write compiled artifacts to.
 /_build/
 
+# Language server artifacts
+/.elixir_ls/
+
 # If you run "mix test --cover", coverage assets end up here.
 /cover/
 
@@ -24,3 +27,9 @@ ecto_types-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# MacOS filesystem junk
+.DS_Store
+
+# IDE configs
+/.vscode
