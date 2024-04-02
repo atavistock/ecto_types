@@ -1,5 +1,5 @@
 defmodule EctoTypes.UsPhoneNumberTest do
-  use DataCase
+  use ExUnit.Case, async: true
 
   alias EctoTypes.UsPhoneNumber
 

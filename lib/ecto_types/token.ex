@@ -1,4 +1,4 @@
-defmodule EctoTypes.Types.Token do
+defmodule EctoTypes.Token do
   @moduledoc """
     A distinct token to use in urls.
 
@@ -57,12 +57,25 @@ defmodule EctoTypes.Types.Token do
     :error
   end
 
+  @spec create :: {:ok, binary} | :error
+  @doc "Creates a random new token"
+  def create do
+    :crypto.strong_rand_bytes(16) |> load()
+  end
+
+  @spec uuid_to_token(binary) :: :error | {:ok, binary}
+  @doc "Helper converting from UUID binary into a token binary."
+  def uuid_to_token(uuid) do
+    {:ok, raw_uuid} = uuid |> Ecto.UUID.dump()
+    raw_uuid |> load()
+  end
+
   @spec sign(any) :: {:ok, binary} | :error
   defp sign(<<_::binary-size(@data_length)>> = unsigned_token) do
     salt =
       :crypto.hash(
         :blake2s,
-        ~s[#{unsigned_token}#{Application.fetch_env!(:token, :signing_salt)}]
+        ~s[#{unsigned_token}#{System.get_env("TOKEN_SIGNING_SALT")}]
       )
       |> Base.encode32(padding: false)
       |> binary_part(0, @salt_length)
@@ -91,16 +104,4 @@ defmodule EctoTypes.Types.Token do
     :error
   end
 
-  @spec create :: {:ok, binary} | :error
-  @doc "Creates a random new token"
-  def create do
-    :crypto.strong_rand_bytes(16) |> load()
-  end
-
-  @spec uuid_to_token(binary) :: :error | {:ok, binary}
-  @doc "Helper converting from UUID binary into a token binary."
-  def uuid_to_token(uuid) when do
-    {:ok, raw_uuid} = uuid |> Ecto.UUID.dump()
-    raw_uuid |> load()
-  end
 end

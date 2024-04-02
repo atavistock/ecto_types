@@ -1,4 +1,4 @@
-defmodule EctoTypes.Types.UsPhoneNumber do
+defmodule EctoTypes.UsPhoneNumber do
   @moduledoc """
     Behaviors for normalizing, storing, and retrieving US phone numbers.
 
@@ -94,7 +94,9 @@ defmodule EctoTypes.Types.UsPhoneNumber do
      :error
   end
 
-  # TODO Move many of these formatting functions to a PhoneFormat module
+  @doc "
+    Validate a phone number as either a ten digit number or a number with a leading '1'
+  "
   @spec valid?(any) :: boolean
   def valid?(number) when integer_phone_bounds(number) do
      true
@@ -108,6 +110,9 @@ defmodule EctoTypes.Types.UsPhoneNumber do
      false
   end
 
+  @doc "
+    Format a phone number into a standard US format or return an empty string
+  "
   @spec format(binary | non_neg_integer) :: binary
   def format(nil), do: ""
   def format(:error), do: ""
@@ -126,16 +131,17 @@ defmodule EctoTypes.Types.UsPhoneNumber do
   end
 
   # Convert a ten digit numeric string into an integer or return :error
-  defp scrub_phone_string(value) do
-    value |> String.replace(~r/\D/, "") |> scrub_phone_string()
-  end
-
+  @spec scrub_phone_string(binary) :: :error | pos_integer
   defp scrub_phone_string("1" <> value) when ten_digit_numeric(value) do
     value |> String.to_integer()
   end
 
   defp scrub_phone_string(value) when ten_digit_numeric(value) do
      value |> String.to_integer()
+  end
+
+  defp scrub_phone_string(value) when is_binary(value) do
+    value |> String.replace(~r/\D/, "") |> scrub_phone_string()
   end
 
   defp scrub_phone_string(_) do

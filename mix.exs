@@ -20,8 +20,9 @@ defmodule EctoTypes.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto_sql, "~> 3.7"},
-      {:credo, "~> 1.5", only: [:dev, :test]}
+      {:ecto, "~> 3.0"},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
     ]
   end
 end
