@@ -16,7 +16,7 @@ defmodule EctoTypes.UsPhoneNumber do
   @split ~r/^(\d{3})(\d{3})(\d{4})$/
   @format "1 (\\1) \\2-\\3"
 
-  defguardp ten_digit_numeric(value) when is_binary(value) and byte_size(value) == 10
+  defguardp ten_digit_binary(value) when is_binary(value) and byte_size(value) == 10
 
   defguardp integer_phone_bounds(value)
             when is_integer(value) and value > 1_999_999_999 and value < 9_999_999_999
@@ -42,7 +42,7 @@ defmodule EctoTypes.UsPhoneNumber do
 
   @impl Ecto.Type
   @spec load(any) :: :error | {:ok, binary}
-  def load(value) when ten_digit_numeric(value) do
+  def load(value) when ten_digit_binary(value) do
     {:ok, load!(value)}
   end
 
@@ -61,7 +61,7 @@ defmodule EctoTypes.UsPhoneNumber do
   end
 
   def dump(value) when is_binary(value) do
-    value |> scrub_phone_string() |> dump()
+    value |> phone_string_to_integer() |> dump()
   end
 
   def dump(_) do
@@ -69,7 +69,7 @@ defmodule EctoTypes.UsPhoneNumber do
   end
 
   @spec load!(any) :: :error | binary
-  def load!(value) when ten_digit_numeric(value) do
+  def load!(value) when ten_digit_binary(value) do
     value |> String.replace(@split, @format)
   end
 
@@ -87,7 +87,7 @@ defmodule EctoTypes.UsPhoneNumber do
   end
 
   def dump!(value) when is_binary(value) do
-     value |> scrub_phone_string() |> dump!()
+     value |> phone_string_to_integer() |> dump!()
   end
 
   def dump!(_) do
@@ -98,53 +98,43 @@ defmodule EctoTypes.UsPhoneNumber do
     Validate a phone number as either a ten digit number or a number with a leading '1'
   "
   @spec valid?(any) :: boolean
-  def valid?(number) when integer_phone_bounds(number) do
-     true
-  end
-
-  def valid?(value) when is_binary(value) do
-     value |> scrub_phone_string() |> valid?()
-  end
-
-  def valid?(_) do
-     false
+  def valid?(value) do
+    case value do
+      value when integer_phone_bounds(value) -> true
+      value when ten_digit_binary(value) -> true
+      value when is_binary(value) -> value |> phone_string_to_integer() |> valid?()
+      _ -> false
+    end
   end
 
   @doc "
     Format a phone number into a standard US format or return an empty string
   "
   @spec format(binary | non_neg_integer) :: binary
-  def format(nil), do: ""
-  def format(:error), do: ""
-  def format(0), do: ""
-
-  def format(number) when is_integer(number) do
-     number |> Integer.to_string() |> format()
+  def format(number) when integer_phone_bounds(number) do
+    number |> Integer.to_string() |> format()
   end
 
-  def format(value) when ten_digit_numeric(value) do
-     value |> String.replace(@split, @format)
+  def format(value) when ten_digit_binary(value) do
+    value |> String.replace(@split, @format)
   end
 
   def format(value) when is_binary(value) do
-     value |> dump!() |> format()
+    value |> phone_string_to_integer() |> format()
+  end
+
+  def format(_) do
+    ""
   end
 
   # Convert a ten digit numeric string into an integer or return :error
-  @spec scrub_phone_string(binary) :: :error | pos_integer
-  defp scrub_phone_string("1" <> value) when ten_digit_numeric(value) do
-    value |> String.to_integer()
+  @spec phone_string_to_integer(any) :: :error | pos_integer
+  defp phone_string_to_integer(value) when is_binary(value) do
+    case String.replace(value, ~r/\D/, "") do
+      "1" <> rest when ten_digit_binary(rest) -> rest |> String.to_integer()
+      value when ten_digit_binary(value) -> value |> String.to_integer()
+      _ -> :error
+    end
   end
 
-  defp scrub_phone_string(value) when ten_digit_numeric(value) do
-     value |> String.to_integer()
-  end
-
-  defp scrub_phone_string(value) when is_binary(value) do
-    value |> String.replace(~r/\D/, "") |> scrub_phone_string()
-  end
-
-  defp scrub_phone_string(_) do
-     :error
-  end
 end
