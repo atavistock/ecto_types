@@ -21,6 +21,7 @@ defmodule EctoTypes.MixProject do
   defp deps do
     [
       {:ecto, "~> 3.0"},
+      {:ex_unit, "~> 1.6", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
     ]

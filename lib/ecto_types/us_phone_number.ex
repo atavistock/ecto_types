@@ -127,7 +127,7 @@ defmodule EctoTypes.UsPhoneNumber do
     ""
   end
 
-  # Convert a ten digit numeric string into an integer or return :error
+  # Convert a binary into an 10-digit integer or return :error
   @spec phone_string_to_integer(any) :: :error | pos_integer
   defp phone_string_to_integer(value) when is_binary(value) do
     case String.replace(value, ~r/\D/, "") do
